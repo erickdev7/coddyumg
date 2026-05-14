@@ -56,10 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
       if (nextSession) {
-        await refreshProfile();
+        queueMicrotask(() => {
+          void refreshProfile();
+        });
       } else {
         setProfile(null);
       }

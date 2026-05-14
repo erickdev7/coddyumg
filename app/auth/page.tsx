@@ -21,32 +21,37 @@ export default function AuthPage() {
     setLoading(true);
     setStatus('');
 
-    const result =
-      mode === 'login'
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                full_name: fullName,
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const result =
+        mode === 'login'
+          ? await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
+          : await supabase.auth.signUp({
+              email: normalizedEmail,
+              password,
+              options: {
+                data: {
+                  full_name: fullName.trim(),
+                },
               },
-            },
-          });
+            });
 
-    setLoading(false);
+      if (result.error) {
+        setStatus(result.error.message);
+        return;
+      }
 
-    if (result.error) {
-      setStatus(result.error.message);
-      return;
+      if (mode === 'register' && !result.data.session) {
+        setStatus('Cuenta creada. Revisa tu correo para confirmar el acceso antes de iniciar sesion.');
+        return;
+      }
+
+      router.push('/dashboard');
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'No se pudo completar la autenticacion.');
+    } finally {
+      setLoading(false);
     }
-
-    if (mode === 'register' && !result.data.session) {
-      setStatus('Cuenta creada. Revisa tu correo para confirmar el acceso antes de iniciar sesión.');
-      return;
-    }
-
-    router.push('/dashboard');
   };
 
   return (
@@ -60,7 +65,7 @@ export default function AuthPage() {
               Acceso para alumnos y profesores
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-gray-600">
-              Inicia sesión para guardar ejercicios, revisar tu avance y habilitar el monitoreo docente.
+              Inicia sesion para guardar ejercicios, revisar tu avance y habilitar el monitoreo docente.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/courses" className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
