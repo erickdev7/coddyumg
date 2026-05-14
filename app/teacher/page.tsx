@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppFooter from '@/app/components/AppFooter';
 import SiteHeader from '@/app/components/SiteHeader';
 import { useAuth } from '@/app/components/AuthProvider';
-import type { ProgressEntry } from '@/lib/types';
+import type { CourseEnrollment, CourseEnrollmentStatus, ProgressEntry } from '@/lib/types';
 
 const COURSE_LABELS: Record<string, string> = {
   python: 'Python',
@@ -32,7 +32,10 @@ export default function TeacherPage() {
   const router = useRouter();
   const { session, profile, loading } = useAuth();
   const [progress, setProgress] = useState<ProgressEntry[]>([]);
+  const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
   const [status, setStatus] = useState('');
+  const [enrollmentStatus, setEnrollmentStatus] = useState('');
+  const [updatingEnrollmentId, setUpdatingEnrollmentId] = useState<string | null>(null);
   const [courseFilter, setCourseFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -50,6 +53,18 @@ export default function TeacherPage() {
     }
   }, [loading, profile, router]);
 
+  const loadEnrollments = useCallback(async (accessToken: string) => {
+    const response = await fetch('/api/enrollments?scope=all', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const body = await response.json();
+
+    if (!response.ok) throw new Error(body.error || 'No se pudieron cargar las solicitudes');
+    setEnrollments(body.data || []);
+  }, []);
+
   useEffect(() => {
     if (!session || profile?.role !== 'teacher') return;
 
@@ -65,6 +80,43 @@ export default function TeacherPage() {
       })
       .catch((error) => setStatus(error.message));
   }, [profile, session]);
+
+  useEffect(() => {
+    if (!session?.access_token || profile?.role !== 'teacher') return;
+
+    const accessToken = session.access_token;
+    queueMicrotask(() => {
+      void loadEnrollments(accessToken).catch((error) => setEnrollmentStatus(error.message));
+    });
+  }, [loadEnrollments, profile?.role, session?.access_token]);
+
+  const updateEnrollment = async (id: string, nextStatus: CourseEnrollmentStatus) => {
+    if (!session?.access_token) return;
+
+    setUpdatingEnrollmentId(id);
+    setEnrollmentStatus('');
+
+    try {
+      const response = await fetch('/api/enrollments', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, status: nextStatus }),
+      });
+      const body = await response.json();
+
+      if (!response.ok) throw new Error(body.error || 'No se pudo actualizar la solicitud');
+
+      setEnrollments((current) => current.map((item) => (item.id === id ? body.data : item)));
+      setEnrollmentStatus(nextStatus === 'approved' ? 'Acceso aprobado.' : 'Solicitud rechazada.');
+    } catch (error) {
+      setEnrollmentStatus(error instanceof Error ? error.message : 'No se pudo actualizar la solicitud');
+    } finally {
+      setUpdatingEnrollmentId(null);
+    }
+  };
 
   const filteredProgress = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -159,6 +211,7 @@ export default function TeacherPage() {
   }, [filteredProgress]);
 
   const completed = filteredProgress.filter((entry) => entry.completed).length;
+  const pendingEnrollments = enrollments.filter((enrollment) => enrollment.status === 'pending');
   const averageScore = filteredProgress.length
     ? Math.round(filteredProgress.reduce((sum, entry) => sum + (entry.score ?? 0), 0) / filteredProgress.length)
     : 0;
@@ -188,8 +241,8 @@ export default function TeacherPage() {
               <p className="mt-2 text-4xl font-bold text-gray-900">{students.length}</p>
             </div>
             <div className="rounded-lg bg-white p-6 shadow">
-              <p className="text-sm font-medium text-gray-500">Registros</p>
-              <p className="mt-2 text-4xl font-bold text-blue-600">{filteredProgress.length}</p>
+              <p className="text-sm font-medium text-gray-500">Solicitudes pendientes</p>
+              <p className="mt-2 text-4xl font-bold text-blue-600">{pendingEnrollments.length}</p>
             </div>
             <div className="rounded-lg bg-white p-6 shadow">
               <p className="text-sm font-medium text-gray-500">Completados</p>
@@ -200,6 +253,79 @@ export default function TeacherPage() {
               <p className="mt-2 text-4xl font-bold text-gray-900">{averageScore}</p>
             </div>
           </div>
+
+          <section className="mt-10 overflow-hidden rounded-lg bg-white shadow">
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h2 className="text-xl font-semibold text-gray-900">Solicitudes de acceso</h2>
+            </div>
+            {enrollmentStatus ? <p className="px-6 py-4 text-sm text-blue-700">{enrollmentStatus}</p> : null}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
+                <thead className="bg-gray-50 text-gray-600">
+                  <tr>
+                    <th className="px-6 py-3 font-semibold">Alumno</th>
+                    <th className="px-6 py-3 font-semibold">Curso</th>
+                    <th className="px-6 py-3 font-semibold">Estado</th>
+                    <th className="px-6 py-3 font-semibold">Solicitado</th>
+                    <th className="px-6 py-3 font-semibold">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {enrollments.length ? (
+                    enrollments.map((enrollment) => (
+                      <tr key={enrollment.id}>
+                        <td className="px-6 py-4">
+                          <p className="font-medium text-gray-900">{enrollment.profiles?.full_name || enrollment.profiles?.email || enrollment.user_id}</p>
+                          <p className="text-gray-500">{enrollment.profiles?.email || enrollment.user_id}</p>
+                        </td>
+                        <td className="px-6 py-4 text-gray-700">{COURSE_LABELS[enrollment.course] || enrollment.course}</td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              enrollment.status === 'approved'
+                                ? 'bg-green-100 text-green-700'
+                                : enrollment.status === 'rejected'
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-yellow-100 text-yellow-700'
+                            }`}
+                          >
+                            {enrollment.status === 'approved' ? 'Aprobado' : enrollment.status === 'rejected' ? 'Rechazado' : 'Pendiente'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">{formatDate(enrollment.requested_at)}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void updateEnrollment(enrollment.id, 'approved')}
+                              disabled={updatingEnrollmentId === enrollment.id || enrollment.status === 'approved'}
+                              className="rounded-md bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                            >
+                              Aprobar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void updateEnrollment(enrollment.id, 'rejected')}
+                              disabled={updatingEnrollmentId === enrollment.id || enrollment.status === 'rejected'}
+                              className="rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+                            >
+                              Rechazar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="px-6 py-8 text-gray-600" colSpan={5}>
+                        Todavia no hay solicitudes. El alumno debe iniciar sesion, entrar a un curso y presionar Solicitar acceso.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
 
           <section className="mt-10 rounded-lg bg-white p-6 shadow">
             <div className="grid gap-4 md:grid-cols-[1fr_180px_180px_auto] md:items-end">
