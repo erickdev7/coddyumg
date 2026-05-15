@@ -50,9 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    const loadingFallback = window.setTimeout(() => {
+      if (mounted) {
+        setLoading(false);
+      }
+    }, 3000);
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
+      window.clearTimeout(loadingFallback);
       setSession(data.session);
       if (data.session) {
         queueMicrotask(() => {
@@ -62,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }).catch(() => {
       if (!mounted) return;
+      window.clearTimeout(loadingFallback);
       setSession(null);
       setProfile(null);
       setLoading(false);
@@ -81,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
+      window.clearTimeout(loadingFallback);
       listener.subscription.unsubscribe();
     };
   }, [refreshProfile, supabase]);
