@@ -37,9 +37,6 @@ export default function SiteHeader() {
             <Link href="/about" className="text-gray-500 hover:text-gray-900">
               Acerca
             </Link>
-            <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
-              Mi progreso
-            </Link>
             {profile?.role === 'teacher' ? (
               <>
                 <Link href="/teacher" className="text-gray-500 hover:text-gray-900">
@@ -49,7 +46,11 @@ export default function SiteHeader() {
                   Contenido
                 </Link>
               </>
-            ) : null}
+            ) : (
+              <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
+                Mi progreso
+              </Link>
+            )}
             {loading ? null : profile ? (
               <button onClick={handleSignOut} className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white hover:bg-gray-700">
                 Salir

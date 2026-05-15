@@ -84,6 +84,12 @@ export default function DashboardPage() {
   }, [loading, router, session]);
 
   useEffect(() => {
+    if (!loading && profile?.role === 'teacher') {
+      router.push('/teacher');
+    }
+  }, [loading, profile?.role, router]);
+
+  useEffect(() => {
     if (!session) return;
 
     fetch('/api/progress', {
@@ -150,7 +156,7 @@ export default function DashboardPage() {
   const studentName = profile?.full_name || 'Alumno';
   const studentEmail = profile?.email || session?.user.email || '';
   const certificateCourse = bestCourse;
-  const certificateReady = certificateCourse.percent >= 80 && certificateCourse.average >= 70;
+  const certificateReady = certificateCourse.percent === 100;
   const lastActivity = progress[0];
 
   return (
@@ -304,8 +310,8 @@ export default function DashboardPage() {
                 </h2>
                 <p className="mt-3 text-gray-600">
                   {certificateReady
-                    ? `Has alcanzado el avance y promedio mínimo para mostrar tu constancia de ${certificateCourse.label}.`
-                    : `Completa al menos 80% de ${certificateCourse.label} y mantén un promedio mínimo de 70 para desbloquearla.`}
+                    ? `Has completado el 100% de ${certificateCourse.label} y puedes mostrar tu constancia.`
+                    : `Completa el 100% de ${certificateCourse.label} para desbloquear la constancia.`}
                 </p>
                 <div className="mt-5 h-3 overflow-hidden rounded-full bg-gray-100">
                   <div className="h-full rounded-full bg-blue-600" style={{ width: `${certificateCourse.percent}%` }} />
@@ -324,7 +330,7 @@ export default function DashboardPage() {
                 <p className="text-sm font-semibold uppercase tracking-wide text-gray-600">CoddyUMG</p>
                 <p className="mt-3 text-xl font-bold text-gray-900">{studentName}</p>
                 <p className="mt-2 text-sm text-gray-600">
-                  {certificateReady ? 'Reconocimiento por avance satisfactorio en programación.' : 'Sigue practicando para desbloquear esta constancia.'}
+                  {certificateReady ? 'Reconocimiento por completar el curso de programacion.' : 'Sigue practicando para desbloquear esta constancia.'}
                 </p>
               </div>
             </div>

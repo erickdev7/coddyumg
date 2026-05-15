@@ -81,7 +81,7 @@ function CertificateContent() {
     ? requestedCourse
     : courseSummary.find((course) => course.completed > 0)?.course || Object.keys(COURSE_LABELS)[0];
   const selectedCourse = courseSummary.find((course) => course.course === selectedCourseKey) || courseSummary[0];
-  const certificateReady = selectedCourse.percent >= 80 && selectedCourse.average >= 70;
+  const certificateReady = selectedCourse.percent === 100;
   const date = useMemo(() => new Intl.DateTimeFormat('es-GT', { dateStyle: 'long' }).format(new Date()), []);
   const folio = useMemo(() => {
     const source = `${profile?.id || profile?.email || 'coddyumg'}-${selectedCourseKey}-${new Date().getFullYear()}`;
@@ -103,9 +103,15 @@ function CertificateContent() {
             <Link href="/dashboard" className="text-sm font-medium text-blue-600 hover:text-blue-700">
               Volver a mi progreso
             </Link>
-            <button onClick={() => window.print()} className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
-              Imprimir o guardar PDF
-            </button>
+            {certificateReady ? (
+              <button onClick={() => window.print()} className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                Imprimir o guardar PDF
+              </button>
+            ) : (
+              <button disabled className="rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-600">
+                Constancia bloqueada
+              </button>
+            )}
           </div>
 
           {status ? <p className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700 print:hidden">{status}</p> : null}
@@ -130,13 +136,17 @@ function CertificateContent() {
             <div className="flex justify-center">
               <Image src="/logocoddyumg.png" alt="Logo CoddyUMG" width={150} height={150} className="h-28 w-28 object-contain" />
             </div>
-            <p className="mt-6 text-sm font-semibold uppercase tracking-[0.3em] text-blue-600">Constancia de avance</p>
+            <p className="mt-6 text-sm font-semibold uppercase tracking-[0.3em] text-blue-600">
+              {certificateReady ? 'Constancia de finalizacion' : 'Constancia no disponible'}
+            </p>
             <h1 className="mt-4 text-4xl font-extrabold text-gray-900">CoddyUMG</h1>
             <p className="mt-3 text-sm font-semibold text-gray-500">Folio {folio}</p>
             <p className="mt-8 text-lg text-gray-600">Otorga la presente constancia a</p>
             <p className="mt-4 text-3xl font-bold text-gray-900">{studentName}</p>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600">
-              Por completar actividades de aprendizaje del curso de {selectedCourse.label} dentro de la plataforma CoddyUMG.
+              {certificateReady
+                ? `Por completar el 100% del curso de ${selectedCourse.label} dentro de la plataforma CoddyUMG.`
+                : `Esta constancia se habilitara cuando complete el 100% del curso de ${selectedCourse.label}.`}
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3 print:hidden">
               <div className="rounded-lg bg-blue-50 p-4">
@@ -149,7 +159,7 @@ function CertificateContent() {
               </div>
               <div className="rounded-lg bg-gray-50 p-4">
                 <p className="text-sm text-gray-600">Estado</p>
-                <p className="text-xl font-bold text-gray-900">{certificateReady ? 'Aprobado' : 'En progreso'}</p>
+                <p className="text-xl font-bold text-gray-900">{certificateReady ? 'Completado' : 'Bloqueado'}</p>
               </div>
             </div>
             <div className="mt-8 rounded-lg border border-gray-200 p-5 text-left print:hidden">
