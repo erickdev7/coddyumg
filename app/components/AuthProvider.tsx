@@ -23,36 +23,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = getSupabaseClient();
 
   const refreshProfile = useCallback(async () => {
-    const { data } = await supabase.auth.getSession();
-    const accessToken = data.session?.access_token;
+    try {
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
 
-    if (!accessToken) {
+      if (!accessToken) {
+        setProfile(null);
+        return;
+      }
+
+      const response = await fetch('/api/me', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const body = await response.json();
+        setProfile(body.data);
+      }
+    } catch {
       setProfile(null);
-      return;
-    }
-
-    const response = await fetch('/api/me', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (response.ok) {
-      const body = await response.json();
-      setProfile(body.data);
     }
   }, [supabase]);
 
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       setSession(data.session);
       if (data.session) {
-        await refreshProfile();
+        queueMicrotask(() => {
+          void refreshProfile();
+        });
       }
+      setLoading(false);
+    }).catch(() => {
+      if (!mounted) return;
+      setSession(null);
+      setProfile(null);
       setLoading(false);
     });
 

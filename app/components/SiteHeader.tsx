@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/components/AuthProvider';
 
 export default function SiteHeader() {
-  const { profile, loading, signOut } = useAuth();
+  const { profile, session, loading, signOut } = useAuth();
   const router = useRouter();
+  const signedInEmail = profile?.email || session?.user.email || '';
+  const signedInName = profile?.full_name || signedInEmail;
 
   const handleSignOut = async () => {
     await signOut();
@@ -51,10 +53,16 @@ export default function SiteHeader() {
                 Mi progreso
               </Link>
             )}
-            {loading ? null : profile ? (
-              <button onClick={handleSignOut} className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white hover:bg-gray-700">
-                Salir
-              </button>
+            {loading && !session ? null : session ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="max-w-56 text-right leading-tight">
+                  <p className="truncate text-xs font-semibold text-gray-900">{signedInName}</p>
+                  {signedInEmail && signedInEmail !== signedInName ? <p className="truncate text-xs text-gray-500">{signedInEmail}</p> : null}
+                </div>
+                <button onClick={handleSignOut} className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white hover:bg-gray-700">
+                  Salir
+                </button>
+              </div>
             ) : (
               <Link href="/auth" className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
                 Ingresar

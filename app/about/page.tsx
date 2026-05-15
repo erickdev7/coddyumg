@@ -10,8 +10,6 @@ const features = [
   'Contenido adicional publicado desde Supabase con uso controlado.',
 ];
 
-const technologies = ['Next.js', 'React', 'Tailwind CSS', 'Supabase Auth', 'Supabase Database'];
-
 export default function AboutPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -53,16 +51,6 @@ export default function AboutPage() {
               </ul>
             </section>
 
-            <section className="mt-8 rounded-lg bg-white p-6 shadow">
-              <h2 className="text-xl font-bold text-gray-900">Tecnologias usadas</h2>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {technologies.map((technology) => (
-                  <span key={technology} className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-                    {technology}
-                  </span>
-                ))}
-              </div>
-            </section>
           </div>
 
           <aside className="rounded-lg bg-white p-8 text-center shadow lg:sticky lg:top-24 lg:self-start">
