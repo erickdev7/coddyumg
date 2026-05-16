@@ -41,9 +41,33 @@ const COURSE_CATEGORY_TOTALS: Record<string, Record<string, number>> = {
 };
 
 const NEXT_LINKS: Record<string, string> = {
-  python: '/courses/python/exercises',
-  cpp: '/courses/cpp/exercises',
-  java: '/courses/java/exercises',
+  python: '/courses/python',
+  cpp: '/courses/cpp',
+  java: '/courses/java',
+};
+
+const COURSE_ROUTE_LINKS: Record<string, Array<{ href: string; label: string }>> = {
+  python: [
+    { href: '/courses/python/modules', label: 'Modulos' },
+    { href: '/courses/python/lessons', label: 'Lecciones' },
+    { href: '/courses/python/exercises', label: 'Ejercicios' },
+    { href: '/courses/python/challenges', label: 'Retos' },
+    { href: '/courses/python/quiz', label: 'Evaluacion' },
+  ],
+  cpp: [
+    { href: '/courses/cpp/modules', label: 'Modulos' },
+    { href: '/courses/cpp/lessons', label: 'Lecciones' },
+    { href: '/courses/cpp/exercises', label: 'Ejercicios' },
+    { href: '/courses/cpp/challenges', label: 'Retos' },
+    { href: '/courses/cpp/quiz', label: 'Evaluacion' },
+  ],
+  java: [
+    { href: '/courses/java/modules', label: 'Modulos' },
+    { href: '/courses/java/lessons', label: 'Lecciones' },
+    { href: '/courses/java/exercises', label: 'Ejercicios' },
+    { href: '/courses/java/challenges', label: 'Retos' },
+    { href: '/courses/java/quiz', label: 'Evaluacion' },
+  ],
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -169,7 +193,7 @@ export default function DashboardPage() {
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Mi progreso</p>
               <h1 className="mt-2 text-4xl font-extrabold text-gray-900">Panel del alumno</h1>
               <p className="mt-3 max-w-2xl text-gray-600">
-                Revisa tus avances, puntajes y el siguiente curso recomendado para continuar practicando.
+                Revisa tus avances, puntajes y entra a la ruta completa de cada curso: lecciones, ejercicios, retos y evaluaciones.
               </p>
             </section>
 
@@ -181,7 +205,7 @@ export default function DashboardPage() {
                 href={nextCourse.href}
                 className="mt-5 inline-flex w-full justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
               >
-                Continuar {nextCourse.label}
+                Abrir ruta de {nextCourse.label}
               </Link>
             </aside>
           </div>
@@ -220,7 +244,7 @@ export default function DashboardPage() {
                   href={NEXT_LINKS[lastActivity.course] || '/courses'}
                   className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                 >
-                  Continuar practicando
+                  Abrir curso completo
                 </Link>
               </div>
             </section>
@@ -249,9 +273,20 @@ export default function DashboardPage() {
                   <p className="mt-4 text-sm text-gray-600">
                     {course.completed} completadas, {course.total} registradas, promedio {course.average}.
                   </p>
-                  <Link href={course.href} className="mt-5 inline-flex rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    Practicar
-                  </Link>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <Link href={course.href} className="inline-flex rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                      Ruta completa
+                    </Link>
+                    {(COURSE_ROUTE_LINKS[course.course] || []).map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="inline-flex rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
                 </article>
               ))}
             </div>
