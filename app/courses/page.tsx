@@ -1,6 +1,10 @@
+'use client';
+
 import AppFooter from '@/app/components/AppFooter';
 import CourseAccessActions from '@/app/components/CourseAccessActions';
 import SiteHeader from '@/app/components/SiteHeader';
+import { useAuth } from '@/app/components/AuthProvider';
+import Link from 'next/link';
 import type { CourseKey } from '@/lib/types';
 
 const courses = [
@@ -49,6 +53,44 @@ const levels = [
 ];
 
 export default function CoursesPage() {
+  const { profile } = useAuth();
+
+  if (profile?.role === 'teacher') {
+    return (
+      <div className="flex min-h-screen flex-col bg-gray-50">
+        <SiteHeader />
+
+        <main className="flex-1">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Administracion CoddyUMG</p>
+              <h1 className="mt-3 text-4xl font-extrabold text-gray-900 sm:text-5xl">Gestion academica</h1>
+              <p className="mt-4 text-xl text-gray-500">
+                Esta cuenta es docente. Desde aqui puedes revisar solicitudes, monitorear progreso y administrar contenido publicado.
+              </p>
+            </div>
+
+            <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <Link href="/teacher" className="rounded-lg bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-md">
+                <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Panel</p>
+                <h2 className="mt-2 text-2xl font-semibold text-gray-900">Solicitudes y progreso</h2>
+                <p className="mt-3 text-gray-600">Aprueba accesos por curso, revisa avance de alumnos y exporta reportes.</p>
+              </Link>
+
+              <Link href="/teacher/content" className="rounded-lg bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-md">
+                <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Contenido</p>
+                <h2 className="mt-2 text-2xl font-semibold text-gray-900">Gestionar material</h2>
+                <p className="mt-3 text-gray-600">Crea, edita, duplica, publica u oculta contenido adicional para los cursos.</p>
+              </Link>
+            </div>
+          </div>
+        </main>
+
+        <AppFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <SiteHeader />

@@ -10,6 +10,7 @@ export default function SiteHeader() {
   const router = useRouter();
   const signedInEmail = profile?.email || session?.user.email || '';
   const signedInName = profile?.full_name || signedInEmail;
+  const isTeacher = profile?.role === 'teacher';
 
   const handleSignOut = async () => {
     await signOut();
@@ -21,7 +22,7 @@ export default function SiteHeader() {
     <header className="bg-white shadow">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
-          <Link href="/" className="flex items-center gap-3 text-2xl font-bold text-gray-900">
+          <Link href={isTeacher ? '/teacher' : '/'} className="flex items-center gap-3 text-2xl font-bold text-gray-900">
             <Image
               src="/logocoddyumg.png"
               alt="Logo CoddyUMG"
@@ -33,13 +34,7 @@ export default function SiteHeader() {
             <span>CoddyUMG</span>
           </Link>
           <nav className="flex w-full flex-wrap items-center gap-x-5 gap-y-3 text-sm sm:w-auto sm:justify-end">
-            <Link href="/courses" className="text-gray-500 hover:text-gray-900">
-              Cursos
-            </Link>
-            <Link href="/about" className="text-gray-500 hover:text-gray-900">
-              Acerca
-            </Link>
-            {profile?.role === 'teacher' ? (
+            {isTeacher ? (
               <>
                 <Link href="/teacher" className="text-gray-500 hover:text-gray-900">
                   Admin
@@ -49,9 +44,17 @@ export default function SiteHeader() {
                 </Link>
               </>
             ) : (
-              <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
-                Mi progreso
-              </Link>
+              <>
+                <Link href="/courses" className="text-gray-500 hover:text-gray-900">
+                  Cursos
+                </Link>
+                <Link href="/about" className="text-gray-500 hover:text-gray-900">
+                  Acerca
+                </Link>
+                <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
+                  Mi progreso
+                </Link>
+              </>
             )}
             {session ? (
               <div className="flex flex-wrap items-center gap-3">

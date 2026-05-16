@@ -24,7 +24,7 @@ export default function CourseAccessGate({ children, course }: { children: React
 
   const courseName = courseLabels[course];
   const isTeacher = profile?.role === 'teacher';
-  const isApproved = isTeacher || status === 'approved';
+  const isApproved = status === 'approved';
 
   const loadStatus = useCallback(async () => {
     if (!session) {
@@ -100,6 +100,34 @@ export default function CourseAccessGate({ children, course }: { children: React
         <SiteHeader />
         <main className="flex flex-1 items-center justify-center px-4">
           <p className="text-sm font-medium text-gray-600">Revisando acceso al curso...</p>
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
+
+  if (isTeacher) {
+    return (
+      <div className="flex min-h-screen flex-col bg-gray-50">
+        <SiteHeader />
+        <main className="flex-1">
+          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+            <section className="rounded-lg bg-white p-8 shadow">
+              <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Administracion</p>
+              <h1 className="mt-2 text-3xl font-extrabold text-gray-900">Panel docente</h1>
+              <p className="mt-4 text-gray-600">
+                Esta cuenta administra cursos y alumnos. Usa el panel para aprobar accesos, revisar progreso y gestionar contenido.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/teacher" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                  Ir a Admin
+                </Link>
+                <Link href="/teacher/content" className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  Gestionar contenido
+                </Link>
+              </div>
+            </section>
+          </div>
         </main>
         <AppFooter />
       </div>

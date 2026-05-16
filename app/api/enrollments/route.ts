@@ -4,6 +4,7 @@ import { ensureProfile, getUserFromRequest } from '@/lib/auth';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 const allowedStatuses = new Set(['pending', 'approved', 'rejected']);
+const enrollmentSelect = '*, profiles:profiles!course_enrollments_user_id_fkey(email, full_name)';
 
 export async function GET(request: Request) {
   try {
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
 
     let query = supabaseAdmin
       .from('course_enrollments')
-      .select('*, profiles(email, full_name)')
+      .select(enrollmentSelect)
       .order('requested_at', { ascending: false });
 
     if (scope !== 'all' || profile.role !== 'teacher') {
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
         },
         { onConflict: 'user_id,course' },
       )
-      .select('*, profiles(email, full_name)')
+      .select(enrollmentSelect)
       .single();
 
     if (error) {
@@ -131,7 +132,7 @@ export async function PATCH(request: Request) {
         reviewed_by: user.id,
       })
       .eq('id', id)
-      .select('*, profiles(email, full_name)')
+      .select(enrollmentSelect)
       .single();
 
     if (error) {
