@@ -1,5 +1,5 @@
 export type UserRole = 'student' | 'teacher';
-export type CourseKey = 'python' | 'cpp' | 'java';
+export type CourseKey = 'python' | 'cpp' | 'java' | 'databases' | 'networks' | 'webdev' | 'cybersecurity';
 export type CourseContentType = 'module' | 'lesson' | 'exercise' | 'challenge' | 'quiz';
 export type CourseEnrollmentStatus = 'pending' | 'approved' | 'rejected';
 

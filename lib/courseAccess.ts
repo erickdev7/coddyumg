@@ -5,6 +5,10 @@ export const COURSE_LABELS: Record<CourseKey, string> = {
   python: 'Python',
   cpp: 'C++',
   java: 'Java',
+  databases: 'Bases de datos',
+  networks: 'Redes',
+  webdev: 'Desarrollo Web',
+  cybersecurity: 'Ciberseguridad',
 };
 
 export const COURSE_KEYS = new Set<CourseKey>(['python', 'cpp', 'java']);

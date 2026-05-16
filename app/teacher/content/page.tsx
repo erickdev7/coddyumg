@@ -38,6 +38,10 @@ const courses: Array<{ value: CourseKey; label: string }> = [
   { value: 'python', label: 'Python' },
   { value: 'cpp', label: 'C++' },
   { value: 'java', label: 'Java' },
+  { value: 'databases', label: 'Bases de datos' },
+  { value: 'networks', label: 'Redes' },
+  { value: 'webdev', label: 'Desarrollo Web' },
+  { value: 'cybersecurity', label: 'Ciberseguridad' },
 ];
 
 const contentTypes: Array<{ value: CourseContentType; label: string }> = [

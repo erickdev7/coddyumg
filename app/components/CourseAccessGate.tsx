@@ -11,6 +11,10 @@ const courseLabels: Record<CourseKey, string> = {
   python: 'Python',
   cpp: 'C++',
   java: 'Java',
+  databases: 'Bases de datos',
+  networks: 'Redes',
+  webdev: 'Desarrollo Web',
+  cybersecurity: 'Ciberseguridad',
 };
 
 type EnrollmentState = CourseEnrollmentStatus | 'none';
