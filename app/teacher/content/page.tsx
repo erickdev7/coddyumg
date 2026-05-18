@@ -38,6 +38,7 @@ const courses: Array<{ value: CourseKey; label: string }> = [
   { value: 'python', label: 'Python' },
   { value: 'cpp', label: 'C++' },
   { value: 'java', label: 'Java' },
+  { value: 'csharp', label: 'C#' },
   { value: 'databases', label: 'Bases de datos' },
   { value: 'networks', label: 'Redes' },
   { value: 'webdev', label: 'Desarrollo Web' },

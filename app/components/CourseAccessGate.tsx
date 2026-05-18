@@ -11,6 +11,7 @@ const courseLabels: Record<CourseKey, string> = {
   python: 'Python',
   cpp: 'C++',
   java: 'Java',
+  csharp: 'C#',
   databases: 'Bases de datos',
   networks: 'Redes',
   webdev: 'Desarrollo Web',

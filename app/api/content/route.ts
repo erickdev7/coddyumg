@@ -3,7 +3,7 @@ import { ensureProfile, getUserFromRequest } from '@/lib/auth';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import type { CourseContentType, CourseKey } from '@/lib/types';
 
-const allowedCourses = new Set<CourseKey>(['python', 'cpp', 'java', 'databases', 'networks', 'webdev', 'cybersecurity']);
+const allowedCourses = new Set<CourseKey>(['python', 'cpp', 'java', 'csharp', 'databases', 'networks', 'webdev', 'cybersecurity']);
 const allowedTypes = new Set<CourseContentType>(['module', 'lesson', 'exercise', 'challenge', 'quiz']);
 
 type ContentPayload = {

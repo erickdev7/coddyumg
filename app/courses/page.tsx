@@ -7,39 +7,53 @@ import SiteHeader from '@/app/components/SiteHeader';
 import { useAuth } from '@/app/components/AuthProvider';
 import type { CourseKey } from '@/lib/types';
 
+type IconName = 'code' | 'database' | 'network' | 'web' | 'shield' | 'terminal';
+
 const activeCourses = [
   {
     title: 'Python',
+    icon: 'terminal' as IconName,
     course: 'python' as CourseKey,
     href: '/courses/python',
     modulesHref: '/courses/python/modules',
     color: 'bg-blue-600 hover:bg-blue-700',
     description: 'Ideal para iniciar: sintaxis clara, automatizacion, datos y pensamiento logico.',
-    topics: ['25 lecciones completas', '25 ejercicios practicos', '25 retos aplicados', '5 evaluaciones'],
   },
   {
     title: 'C++',
+    icon: 'code' as IconName,
     course: 'cpp' as CourseKey,
     href: '/courses/cpp',
     modulesHref: '/courses/cpp/modules',
     color: 'bg-green-600 hover:bg-green-700',
     description: 'Enfoque en fundamentos fuertes: memoria, estructuras, objetos y algoritmos.',
-    topics: ['25 lecciones completas', '25 ejercicios practicos', '25 retos aplicados', '5 evaluaciones'],
   },
   {
     title: 'Java',
+    icon: 'code' as IconName,
     course: 'java' as CourseKey,
     href: '/courses/java',
     modulesHref: '/courses/java/modules',
     color: 'bg-red-600 hover:bg-red-700',
     description: 'Practica programacion orientada a objetos para crear aplicaciones ordenadas.',
-    topics: ['25 lecciones completas', '25 ejercicios practicos', '25 retos aplicados', '5 evaluaciones'],
+  },
+];
+
+const programmingStructure = ['25 lecciones completas', '25 ejercicios practicos', '25 retos aplicados', '5 evaluaciones'];
+
+const plannedProgrammingCourses = [
+  {
+    title: 'C#',
+    icon: 'code' as IconName,
+    description: 'Curso preparado para fundamentos de C#, POO, colecciones, LINQ y desarrollo con .NET.',
+    topics: ['Sintaxis de C#', 'POO con .NET', 'Colecciones y LINQ', 'APIs con ASP.NET'],
   },
 ];
 
 const upcomingCategories = [
   {
     title: 'Bases de datos',
+    icon: 'database' as IconName,
     description: 'Categoria lista para material de modelado, SQL, PostgreSQL, Supabase y administracion de datos.',
     courses: [
       {
@@ -56,6 +70,7 @@ const upcomingCategories = [
   },
   {
     title: 'Redes',
+    icon: 'network' as IconName,
     description: 'Categoria preparada para fundamentos de redes, servicios, seguridad y diagnostico.',
     courses: [
       {
@@ -72,6 +87,7 @@ const upcomingCategories = [
   },
   {
     title: 'Desarrollo Web',
+    icon: 'web' as IconName,
     description: 'Ruta futura para frontend, backend, APIs, autenticacion, despliegue e integracion con bases de datos.',
     courses: [
       {
@@ -88,6 +104,7 @@ const upcomingCategories = [
   },
   {
     title: 'Ciberseguridad',
+    icon: 'shield' as IconName,
     description: 'Categoria adicional preparada para fundamentos de seguridad, buenas practicas y defensa de aplicaciones.',
     courses: [
       {
@@ -99,6 +116,11 @@ const upcomingCategories = [
         title: 'Seguridad Web',
         description: 'Validacion de entradas, sesiones, permisos, errores seguros y hardening basico.',
         topics: ['Validacion', 'Sesiones', 'Permisos', 'Hardening'],
+      },
+      {
+        title: 'Ethical Hacking',
+        description: 'Metodologia de pruebas autorizadas, reconocimiento, analisis de vulnerabilidades y reporte responsable.',
+        topics: ['Reconocimiento', 'Escaneo autorizado', 'Vulnerabilidades web', 'Reporte tecnico'],
       },
     ],
   },
@@ -118,6 +140,25 @@ const levels = [
     description: 'Errores, archivos, herencia, interfaces, datos, retos integradores y evaluaciones.',
   },
 ];
+
+function CourseIcon({ name }: { name: IconName }) {
+  const pathByName: Record<IconName, string> = {
+    code: 'M8 9 4 12l4 3M16 9l4 3-4 3M14 5l-4 14',
+    database: 'M5 6c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3Zm0 0v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6',
+    network: 'M12 5v6m0 0H6m6 0h6M6 11v4m12-4v4M4 19h4v-4H4v4Zm14 0h4v-4h-4v4Zm-8-14h4V1h-4v4Z',
+    web: 'M4 5h16v14H4V5Zm0 4h16M8 5v4',
+    shield: 'M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z',
+    terminal: 'M5 7l5 5-5 5M12 17h7',
+  };
+
+  return (
+    <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gray-900 text-white">
+      <svg aria-hidden="true" className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
+        <path d={pathByName[name]} />
+      </svg>
+    </span>
+  );
+}
 
 export default function CoursesPage() {
   const { profile } = useAuth();
@@ -180,10 +221,44 @@ export default function CoursesPage() {
                 <p className="mt-2 max-w-3xl text-gray-600">Cursos actuales con ruta completa, acceso por autorizacion y progreso del alumno.</p>
               </div>
 
+              <div className="mb-8 rounded-lg bg-white p-6 shadow">
+                <h3 className="text-xl font-bold text-gray-900">Estructura de los cursos activos</h3>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {programmingStructure.map((item) => (
+                    <div key={item} className="rounded-lg border border-gray-200 p-4">
+                      <p className="text-sm font-semibold text-gray-800">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                 {activeCourses.map((course) => (
                   <article key={course.title} className="flex flex-col rounded-lg bg-white p-6 shadow">
-                    <h3 className="text-2xl font-semibold text-gray-900">{course.title}</h3>
+                    <div className="flex items-center gap-4">
+                      <CourseIcon name={course.icon} />
+                      <h3 className="text-2xl font-semibold text-gray-900">{course.title}</h3>
+                    </div>
+                    <p className="mt-3 text-gray-600">{course.description}</p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <CourseAccessActions course={course.course} href={course.href} modulesHref={course.modulesHref} color={course.color} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
+                {plannedProgrammingCourses.map((course) => (
+                  <article key={course.title} className="flex flex-col rounded-lg border border-dashed border-gray-300 bg-white p-6 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-4">
+                        <CourseIcon name={course.icon} />
+                        <h3 className="text-2xl font-semibold text-gray-900">{course.title}</h3>
+                      </div>
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600">
+                        Proximamente
+                      </span>
+                    </div>
                     <p className="mt-3 text-gray-600">{course.description}</p>
                     <ul className="mt-5 space-y-2 text-sm text-gray-600">
                       {course.topics.map((topic) => (
@@ -193,9 +268,9 @@ export default function CoursesPage() {
                         </li>
                       ))}
                     </ul>
-                    <div className="mt-6 flex flex-wrap gap-3">
-                      <CourseAccessActions course={course.course} href={course.href} modulesHref={course.modulesHref} color={course.color} />
-                    </div>
+                    <p className="mt-6 rounded-md bg-blue-50 px-4 py-3 text-sm font-medium text-blue-800">
+                      El admin ya puede preparar contenido de C# desde Gestionar contenido.
+                    </p>
                   </article>
                 ))}
               </div>
@@ -204,8 +279,13 @@ export default function CoursesPage() {
             {upcomingCategories.map((category) => (
               <section key={category.title}>
                 <div className="mb-5">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Listo para estructurar</p>
-                  <h2 className="mt-2 text-3xl font-bold text-gray-900">{category.title}</h2>
+                  <div className="flex items-center gap-4">
+                    <CourseIcon name={category.icon} />
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Listo para estructurar</p>
+                      <h2 className="mt-2 text-3xl font-bold text-gray-900">{category.title}</h2>
+                    </div>
+                  </div>
                   <p className="mt-2 max-w-3xl text-gray-600">{category.description}</p>
                 </div>
 
