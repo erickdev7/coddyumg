@@ -64,6 +64,21 @@ const plannedCourses: Record<string, PlannedCourse> = {
     challenges: ['Reporte academico', 'Consulta con HAVING', 'Vista para docente', 'Optimizar busqueda lenta', 'Flujo de pago transaccional'],
     evaluations: ['Joins', 'Agregaciones', 'Vistas', 'Indices', 'Evaluacion final SQL'],
   },
+  'database-advanced': {
+    category: 'Bases de datos',
+    title: 'Bases de Datos Avanzadas',
+    description: 'Ruta para administrar bases de datos en escenarios reales: rendimiento, integridad, seguridad, respaldo y operacion.',
+    modules: [
+      { title: 'Optimizacion de consultas', goal: 'Leer planes de ejecucion y detectar cuellos de botella.', lessons: ['EXPLAIN y query planner', 'Indices compuestos y parciales'], project: 'Optimizar consultas lentas de un panel academico.' },
+      { title: 'Transacciones y concurrencia', goal: 'Proteger la integridad cuando varios usuarios operan al mismo tiempo.', lessons: ['Aislamiento y bloqueos', 'Deadlocks y reintentos'], project: 'Flujo transaccional de inscripcion.' },
+      { title: 'Seguridad y auditoria', goal: 'Aplicar roles, permisos, politicas y bitacoras.', lessons: ['Roles y privilegios', 'Auditoria y trazabilidad'], project: 'Modelo de permisos para docente/alumno.' },
+      { title: 'Respaldo y recuperacion', goal: 'Planificar backups, restauraciones y pruebas de continuidad.', lessons: ['Backups logicos y fisicos', 'RPO, RTO y restauracion'], project: 'Plan de recuperacion para plataforma educativa.' },
+      { title: 'Escalabilidad y operacion', goal: 'Preparar bases para monitoreo, replicacion y crecimiento.', lessons: ['Replicacion y particionamiento', 'Monitoreo y mantenimiento'], project: 'Plan operativo de base de datos en produccion.' },
+    ],
+    exercises: ['Interpretar EXPLAIN', 'Crear indice compuesto', 'Simular transaccion segura', 'Definir rol de lectura', 'Plan de backup verificable'],
+    challenges: ['Optimizar reporte pesado', 'Resolver conflicto de concurrencia', 'Auditoria de cambios sensibles', 'Restauracion ante incidente', 'Plan de escalabilidad'],
+    evaluations: ['Query planner', 'Concurrencia', 'Seguridad', 'Backups', 'Evaluacion final BD avanzada'],
+  },
   'network-fundamentals': {
     category: 'Redes',
     title: 'Fundamentos de Redes',
@@ -171,8 +186,72 @@ const plannedCourses: Record<string, PlannedCourse> = {
   },
 };
 
-function renderList(items: string[], prefix: string) {
-  return items.map((item, index) => `${prefix} ${index + 1}: ${item}`);
+function getLessonExample(course: PlannedCourse, lesson: string) {
+  if (course.title === 'C#') {
+    return `// ${lesson}\nusing System;\n\nvar tema = "${lesson}";\nConsole.WriteLine($"Practica: {tema}");`;
+  }
+
+  if (course.category === 'Bases de datos') {
+    return `-- ${lesson}\nselect curso, count(*) as total\nfrom progreso\nwhere completado = true\ngroup by curso\norder by total desc;`;
+  }
+
+  if (course.category === 'Redes') {
+    return `# ${lesson}\nping 8.8.8.8\nnslookup coddyumg.edu.gt\ntracert coddyumg.edu.gt`;
+  }
+
+  if (course.category === 'Desarrollo Web' && course.title === 'Frontend') {
+    return `<!-- ${lesson} -->\n<section class="curso">\n  <h2>CoddyUMG</h2>\n  <button>Continuar</button>\n</section>`;
+  }
+
+  if (course.category === 'Desarrollo Web') {
+    return `// ${lesson}\nexport async function GET() {\n  return Response.json({ curso: "CoddyUMG", estado: "ok" });\n}`;
+  }
+
+  if (course.title === 'Ethical Hacking') {
+    return `# ${lesson}\n1. Confirmar autorizacion escrita.\n2. Definir alcance.\n3. Registrar evidencia sin afectar sistemas.\n4. Reportar hallazgos y mitigaciones.`;
+  }
+
+  return `# ${lesson}\n- Identifica el riesgo.\n- Propone un control.\n- Documenta evidencia.\n- Verifica la mitigacion.`;
+}
+
+function getLessonContent(course: PlannedCourse, moduleTitle: string, lesson: string) {
+  return `En esta leccion de ${course.title} se trabaja ${lesson.toLowerCase()} dentro del modulo ${moduleTitle}. El objetivo es que el estudiante entienda el concepto, observe un ejemplo y pueda explicar donde se aplica en un caso academico o profesional.`;
+}
+
+function getExerciseDetail(course: PlannedCourse, exercise: string, index: number) {
+  const starter =
+    course.category === 'Bases de datos'
+      ? `-- Punto de partida\nselect * from tabla_base where id = ${index + 1};`
+      : course.category === 'Redes'
+        ? `# Punto de partida\nDocumenta objetivo, comando usado y resultado observado.`
+        : course.category === 'Desarrollo Web'
+          ? `// Punto de partida\nconst actividad = "${exercise}";\nconsole.log(actividad);`
+          : course.title === 'C#'
+            ? `// Punto de partida\nvar actividad = "${exercise}";\nConsole.WriteLine(actividad);`
+            : `# Punto de partida\nDescribe el alcance autorizado y el control que vas a validar.`;
+
+  return {
+    objective: `Resolver "${exercise}" aplicando lo aprendido y dejando evidencia clara del resultado.`,
+    starter,
+    expected: `Entrega valida: solucion documentada, resultado comprobable y una breve explicacion de por que funciona.`,
+  };
+}
+
+function getChallengeSteps(challenge: string) {
+  return [
+    `Analiza el caso "${challenge}" y define el objetivo principal.`,
+    'Divide la solucion en pasos verificables.',
+    'Prepara evidencia del resultado: consulta, captura, reporte o salida esperada.',
+    'Redacta una conclusion con mejoras posibles.',
+  ];
+}
+
+function getEvaluationQuestion(course: PlannedCourse, evaluation: string) {
+  return {
+    question: `Que debe demostrar el estudiante en "${evaluation}" dentro de ${course.title}?`,
+    options: ['Comprension del concepto y aplicacion practica', 'Solo memorizacion de definiciones', 'Uso de herramientas sin explicar resultados'],
+    answer: 'Comprension del concepto y aplicacion practica',
+  };
 }
 
 export function generateStaticParams() {
@@ -219,11 +298,19 @@ export default async function PlannedCoursePage({
                   <p className="mt-2 text-sm text-gray-600">{module.goal}</p>
                   <div className="mt-4">
                     <h4 className="text-sm font-semibold text-gray-900">Lecciones</h4>
-                    <ul className="mt-2 space-y-2 text-sm text-gray-600">
-                      {renderList(module.lessons, 'Leccion').map((lesson) => (
-                        <li key={lesson}>{lesson}</li>
+                    <div className="mt-3 space-y-4">
+                      {module.lessons.map((lesson, lessonIndex) => (
+                        <article key={lesson} className="rounded-md border border-gray-200 p-4">
+                          <p className="text-sm font-semibold text-gray-900">
+                            Leccion {lessonIndex + 1}: {lesson}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-gray-600">{getLessonContent(data, module.title, lesson)}</p>
+                          <pre className="mt-3 overflow-x-auto rounded-md bg-gray-950 p-3 text-xs text-green-200">
+                            <code>{getLessonExample(data, lesson)}</code>
+                          </pre>
+                        </article>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                   <p className="mt-4 rounded-md bg-gray-50 p-3 text-sm text-gray-700">
                     <span className="font-semibold text-gray-900">Proyecto del modulo: </span>
@@ -237,29 +324,60 @@ export default async function PlannedCoursePage({
           <div className="mt-10 grid gap-6 lg:grid-cols-3">
             <section className="rounded-lg bg-white p-6 shadow">
               <h2 className="text-xl font-bold text-gray-900">Ejercicios</h2>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                {renderList(data.exercises, 'Ejercicio').map((exercise) => (
-                  <li key={exercise}>{exercise}</li>
-                ))}
-              </ul>
+              <div className="mt-4 space-y-4">
+                {data.exercises.map((exercise, index) => {
+                  const detail = getExerciseDetail(data, exercise, index);
+
+                  return (
+                    <article key={exercise} className="rounded-md border border-gray-200 p-4">
+                      <p className="text-sm font-semibold text-gray-900">Ejercicio {index + 1}: {exercise}</p>
+                      <p className="mt-2 text-sm text-gray-600">{detail.objective}</p>
+                      <pre className="mt-3 overflow-x-auto rounded-md bg-gray-950 p-3 text-xs text-green-200">
+                        <code>{detail.starter}</code>
+                      </pre>
+                      <p className="mt-3 text-xs font-medium text-gray-600">{detail.expected}</p>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
 
             <section className="rounded-lg bg-white p-6 shadow">
               <h2 className="text-xl font-bold text-gray-900">Retos</h2>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                {renderList(data.challenges, 'Reto').map((challenge) => (
-                  <li key={challenge}>{challenge}</li>
+              <div className="mt-4 space-y-4">
+                {data.challenges.map((challenge, index) => (
+                  <article key={challenge} className="rounded-md border border-gray-200 p-4">
+                    <p className="text-sm font-semibold text-gray-900">Reto {index + 1}: {challenge}</p>
+                    <ul className="mt-3 space-y-2 text-sm text-gray-600">
+                      {getChallengeSteps(challenge).map((step) => (
+                        <li key={step}>- {step}</li>
+                      ))}
+                    </ul>
+                  </article>
                 ))}
-              </ul>
+              </div>
             </section>
 
             <section className="rounded-lg bg-white p-6 shadow">
               <h2 className="text-xl font-bold text-gray-900">Evaluaciones</h2>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                {renderList(data.evaluations, 'Evaluacion').map((evaluation) => (
-                  <li key={evaluation}>{evaluation}</li>
-                ))}
-              </ul>
+              <div className="mt-4 space-y-4">
+                {data.evaluations.map((evaluation, index) => {
+                  const detail = getEvaluationQuestion(data, evaluation);
+
+                  return (
+                    <article key={evaluation} className="rounded-md border border-gray-200 p-4">
+                      <p className="text-sm font-semibold text-gray-900">Evaluacion {index + 1}: {evaluation}</p>
+                      <p className="mt-2 text-sm text-gray-600">{detail.question}</p>
+                      <ul className="mt-3 space-y-2 text-sm text-gray-600">
+                        {detail.options.map((option) => (
+                          <li key={option}>- {option}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 rounded-md bg-green-50 p-2 text-xs font-semibold text-green-800">Respuesta esperada: {detail.answer}</p>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
           </div>
         </div>

@@ -69,6 +69,12 @@ const upcomingCategories = [
         description: 'Joins, agregaciones, vistas, indices y buenas practicas para consultas.',
         topics: ['Joins', 'Group by', 'Vistas', 'Indices'],
       },
+      {
+        title: 'Bases de Datos Avanzadas',
+        href: '/courses/database-advanced',
+        description: 'Optimizacion, transacciones, seguridad, respaldo, replicacion y diseno para produccion.',
+        topics: ['Query planning', 'Transacciones', 'Seguridad', 'Respaldo y replicacion'],
+      },
     ],
   },
   {
