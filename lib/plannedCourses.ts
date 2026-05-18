@@ -215,6 +215,28 @@ export function getLessonContent(course: PlannedCourse, moduleTitle: string, les
   return `En esta leccion de ${course.title} se trabaja ${lesson.toLowerCase()} dentro del modulo ${moduleTitle}. El objetivo es que el estudiante entienda el concepto, observe un ejemplo y pueda explicar donde se aplica en un caso academico o profesional.`;
 }
 
+function expandModuleLessons(module: PlannedModule) {
+  return [
+    module.lessons[0],
+    module.lessons[1],
+    `Aplicacion guiada de ${module.title}`,
+    `Buenas practicas en ${module.title}`,
+    `Proyecto aplicado: ${module.project.replace(/\.$/, '')}`,
+  ];
+}
+
+export function getCourseLessons(courseSlug: string) {
+  const course = plannedCourses[courseSlug];
+  if (!course) return [];
+
+  return course.modules.flatMap((module) =>
+    expandModuleLessons(module).map((lesson) => ({
+      lesson,
+      module,
+    })),
+  );
+}
+
 export function getExerciseDetail(course: PlannedCourse, exercise: string, index: number) {
   const starter =
     course.category === 'Bases de datos'
@@ -232,6 +254,30 @@ export function getExerciseDetail(course: PlannedCourse, exercise: string, index
     starter,
     expected: 'Entrega valida: solucion documentada, resultado comprobable y una breve explicacion de por que funciona.',
   };
+}
+
+function expandModuleExercises(module: PlannedModule, seed: string) {
+  const lessons = expandModuleLessons(module);
+
+  return [
+    seed,
+    `Practica: ${lessons[0]}`,
+    `Practica: ${lessons[1]}`,
+    `Caso aplicado: ${module.title}`,
+    `Entrega del proyecto: ${module.project.replace(/\.$/, '')}`,
+  ];
+}
+
+function expandModuleChallenges(module: PlannedModule, seed: string) {
+  const lessons = expandModuleLessons(module);
+
+  return [
+    seed,
+    `Resolver caso real de ${lessons[0].toLowerCase()}`,
+    `Auditar o validar ${lessons[1].toLowerCase()}`,
+    `Integrar ${module.title.toLowerCase()} con evidencia`,
+    `Presentar ${module.project.replace(/\.$/, '').toLowerCase()}`,
+  ];
 }
 
 export function getChallengeSteps(challenge: string) {
@@ -255,7 +301,9 @@ export function getCourseExercises(courseSlug: string) {
   const course = plannedCourses[courseSlug];
   if (!course) return [];
 
-  return course.exercises.map((exercise, index) => {
+  const exercises = course.modules.flatMap((module, moduleIndex) => expandModuleExercises(module, course.exercises[moduleIndex] || module.title));
+
+  return exercises.map((exercise, index) => {
     const detail = getExerciseDetail(course, exercise, index);
 
     return {
@@ -272,7 +320,9 @@ export function getCourseChallenges(courseSlug: string) {
   const course = plannedCourses[courseSlug];
   if (!course) return [];
 
-  return course.challenges.map((challenge, index) => ({
+  const challenges = course.modules.flatMap((module, moduleIndex) => expandModuleChallenges(module, course.challenges[moduleIndex] || module.title));
+
+  return challenges.map((challenge, index) => ({
     title: `Reto ${index + 1}: ${challenge}`,
     description: `Caso aplicado para demostrar dominio de ${challenge.toLowerCase()}.`,
     steps: getChallengeSteps(challenge),

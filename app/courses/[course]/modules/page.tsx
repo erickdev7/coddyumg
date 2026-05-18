@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import AppFooter from '@/app/components/AppFooter';
 import CourseModules from '@/app/components/CourseModules';
 import SiteHeader from '@/app/components/SiteHeader';
-import { plannedCourses } from '@/lib/plannedCourses';
+import { getCourseLessons, plannedCourses } from '@/lib/plannedCourses';
 
 export function generateStaticParams() {
   return Object.keys(plannedCourses).map((course) => ({ course }));
@@ -18,6 +18,8 @@ export default async function PlannedModulesPage({
   const data = plannedCourses[course];
 
   if (!data) notFound();
+
+  const lessons = getCourseLessons(course);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -40,13 +42,13 @@ export default async function PlannedModulesPage({
               level: `Modulo ${index + 1}`,
               title: module.title,
               description: module.goal,
-              outcomes: module.lessons.map((lesson) => `Dominar ${lesson.toLowerCase()}`),
-              activities: [`Lecciones ${index * 2 + 1} y ${index * 2 + 2}`, `Ejercicio ${index + 1}`, `Reto ${index + 1}`],
+              outcomes: lessons.slice(index * 5, index * 5 + 5).map(({ lesson }) => `Dominar ${lesson.toLowerCase()}`),
+              activities: [`Lecciones ${index * 5 + 1} a ${index * 5 + 5}`, `Ejercicios ${index * 5 + 1} a ${index * 5 + 5}`, `Retos ${index * 5 + 1} a ${index * 5 + 5}`],
               project: module.project,
               hrefs: {
-                lesson: `/courses/${course}/lessons#lesson-${index * 2 + 1}`,
-                exercise: `/courses/${course}/exercises#exercise-${index + 1}`,
-                challenge: `/courses/${course}/challenges#challenge-${index + 1}`,
+                lesson: `/courses/${course}/lessons#lesson-${index * 5 + 1}`,
+                exercise: `/courses/${course}/exercises#exercise-${index * 5 + 1}`,
+                challenge: `/courses/${course}/challenges#challenge-${index * 5 + 1}`,
               },
             }))}
           />

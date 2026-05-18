@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import AppFooter from '@/app/components/AppFooter';
 import ProgressButton from '@/app/components/ProgressButton';
 import SiteHeader from '@/app/components/SiteHeader';
-import { getLessonContent, getLessonExample, plannedCourses } from '@/lib/plannedCourses';
+import { getCourseLessons, getLessonContent, getLessonExample, plannedCourses } from '@/lib/plannedCourses';
 
 const courseLabels: Record<string, string> = {
   python: 'Python',
@@ -77,7 +77,7 @@ export function generateStaticParams() {
     Array.from({ length: 25 }, (_, index) => ({ course, lesson: String(index + 1) })),
   );
   const plannedParams = Object.entries(plannedCourses).flatMap(([course, data]) =>
-    Array.from({ length: data.modules.flatMap((module) => module.lessons).length }, (_, index) => ({ course, lesson: String(index + 1) })),
+    Array.from({ length: data.modules.length * 5 }, (_, index) => ({ course, lesson: String(index + 1) })),
   );
 
   return [...activeParams, ...plannedParams];
@@ -95,7 +95,7 @@ export default async function LessonDetailPage({
   const plannedCourse = plannedCourses[course];
 
   if (plannedCourse) {
-    const lessons = plannedCourse.modules.flatMap((module) => module.lessons.map((lessonTitle) => ({ lessonTitle, module })));
+    const lessons = getCourseLessons(course).map(({ lesson, module }) => ({ lessonTitle: lesson, module }));
     const plannedLesson = lessons[lessonNumber - 1];
 
     if (!plannedLesson || lessonNumber < 1) {
@@ -152,10 +152,10 @@ export default async function LessonDetailPage({
                   Crea una version propia del ejemplo para {plannedCourse.title}. Incluye objetivo, pasos y salida esperada.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <Link href={`/courses/${course}/exercises#exercise-${Math.ceil(lessonNumber / 2)}`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
+                  <Link href={`/courses/${course}/exercises#exercise-${lessonNumber}`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
                     Ir al ejercicio relacionado
                   </Link>
-                  <Link href={`/courses/${course}/challenges#challenge-${Math.ceil(lessonNumber / 2)}`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
+                  <Link href={`/courses/${course}/challenges#challenge-${lessonNumber}`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
                     Ir al reto relacionado
                   </Link>
                 </div>

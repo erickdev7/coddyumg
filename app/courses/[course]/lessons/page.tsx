@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import AppFooter from '@/app/components/AppFooter';
 import ProgressButton from '@/app/components/ProgressButton';
 import SiteHeader from '@/app/components/SiteHeader';
-import { getLessonContent, getLessonExample, plannedCourses } from '@/lib/plannedCourses';
+import { getCourseLessons, getLessonContent, getLessonExample, plannedCourses } from '@/lib/plannedCourses';
 
 export function generateStaticParams() {
   return Object.keys(plannedCourses).map((course) => ({ course }));
@@ -19,7 +19,7 @@ export default async function PlannedLessonsPage({
 
   if (!data) notFound();
 
-  const lessons = data.modules.flatMap((module) => module.lessons.map((lesson) => ({ lesson, module })));
+  const lessons = getCourseLessons(course);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -39,7 +39,7 @@ export default async function PlannedLessonsPage({
               <section key={`${module.title}-${lesson}`} id={`lesson-${index + 1}`} className="scroll-mt-24 rounded-lg bg-white p-8 shadow">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-                    Modulo {Math.floor(index / 2) + 1}
+                    Modulo {Math.floor(index / 5) + 1}
                   </span>
                   <h2 className="text-2xl font-semibold text-gray-900">{index + 1}. {lesson}</h2>
                 </div>
