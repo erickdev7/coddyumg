@@ -45,6 +45,7 @@ const plannedProgrammingCourses = [
   {
     title: 'C#',
     icon: 'code' as IconName,
+    href: '/courses/csharp',
     description: 'Curso preparado para fundamentos de C#, POO, colecciones, LINQ y desarrollo con .NET.',
     topics: ['Sintaxis de C#', 'POO con .NET', 'Colecciones y LINQ', 'APIs con ASP.NET'],
   },
@@ -58,11 +59,13 @@ const upcomingCategories = [
     courses: [
       {
         title: 'Fundamentos de Bases de Datos',
+        href: '/courses/database-fundamentals',
         description: 'Modelo relacional, tablas, llaves, normalizacion y consultas basicas.',
         topics: ['Modelo entidad-relacion', 'SQL basico', 'Normalizacion', 'PostgreSQL y Supabase'],
       },
       {
         title: 'SQL Intermedio',
+        href: '/courses/sql-intermediate',
         description: 'Joins, agregaciones, vistas, indices y buenas practicas para consultas.',
         topics: ['Joins', 'Group by', 'Vistas', 'Indices'],
       },
@@ -75,11 +78,13 @@ const upcomingCategories = [
     courses: [
       {
         title: 'Fundamentos de Redes',
+        href: '/courses/network-fundamentals',
         description: 'Modelo OSI/TCP-IP, direccionamiento, subredes, routing basico y herramientas.',
         topics: ['TCP/IP', 'Subnetting', 'DNS y DHCP', 'Diagnostico'],
       },
       {
         title: 'Servicios de Red',
+        href: '/courses/network-services',
         description: 'Configuracion conceptual de servicios comunes y monitoreo basico.',
         topics: ['HTTP', 'DNS', 'SSH', 'Monitoreo'],
       },
@@ -92,11 +97,13 @@ const upcomingCategories = [
     courses: [
       {
         title: 'Frontend',
+        href: '/courses/frontend',
         description: 'HTML, CSS, JavaScript, componentes, estado y consumo de APIs.',
         topics: ['HTML/CSS', 'JavaScript', 'React', 'UI responsive'],
       },
       {
         title: 'Backend y APIs',
+        href: '/courses/backend-apis',
         description: 'Rutas, controladores, validacion, autenticacion, REST y conexion a datos.',
         topics: ['REST APIs', 'Auth', 'Validacion', 'Integracion con DB'],
       },
@@ -109,16 +116,19 @@ const upcomingCategories = [
     courses: [
       {
         title: 'Seguridad Basica',
+        href: '/courses/security-basics',
         description: 'Principios de seguridad, contrasenas, amenazas comunes y proteccion de datos.',
         topics: ['Amenazas comunes', 'Buenas practicas', 'OWASP inicial', 'Proteccion de cuentas'],
       },
       {
         title: 'Seguridad Web',
+        href: '/courses/web-security',
         description: 'Validacion de entradas, sesiones, permisos, errores seguros y hardening basico.',
         topics: ['Validacion', 'Sesiones', 'Permisos', 'Hardening'],
       },
       {
         title: 'Ethical Hacking',
+        href: '/courses/ethical-hacking',
         description: 'Metodologia de pruebas autorizadas, reconocimiento, analisis de vulnerabilidades y reporte responsable.',
         topics: ['Reconocimiento', 'Escaneo autorizado', 'Vulnerabilidades web', 'Reporte tecnico'],
       },
@@ -271,6 +281,9 @@ export default function CoursesPage() {
                     <p className="mt-6 rounded-md bg-blue-50 px-4 py-3 text-sm font-medium text-blue-800">
                       El admin ya puede preparar contenido de C# desde Gestionar contenido.
                     </p>
+                    <Link href={course.href} className="mt-5 inline-flex w-fit rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                      Ver estructura
+                    </Link>
                   </article>
                 ))}
               </div>
@@ -310,6 +323,9 @@ export default function CoursesPage() {
                       <p className="mt-6 rounded-md bg-blue-50 px-4 py-3 text-sm font-medium text-blue-800">
                         El admin ya puede preparar contenido para esta categoria desde Gestionar contenido.
                       </p>
+                      <Link href={course.href} className="mt-5 inline-flex w-fit rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                        Ver estructura
+                      </Link>
                     </article>
                   ))}
                 </div>
