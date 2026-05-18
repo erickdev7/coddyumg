@@ -5,18 +5,21 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SiteHeader from '@/app/components/SiteHeader';
 import { useAuth } from '@/app/components/AuthProvider';
+import { plannedCourses } from '@/lib/plannedCourses';
 import type { ProgressEntry } from '@/lib/types';
 
 const COURSE_LABELS: Record<string, string> = {
   python: 'Python',
   cpp: 'C++',
   java: 'Java',
+  ...Object.fromEntries(Object.entries(plannedCourses).map(([key, course]) => [key, course.title])),
 };
 
 const COURSE_TOTALS: Record<string, number> = {
   python: 80,
   cpp: 80,
   java: 80,
+  ...Object.fromEntries(Object.keys(plannedCourses).map((course) => [course, 25])),
 };
 
 const COURSE_CATEGORY_TOTALS: Record<string, Record<string, number>> = {
@@ -38,12 +41,24 @@ const COURSE_CATEGORY_TOTALS: Record<string, Record<string, number>> = {
     challenge: 25,
     quiz: 5,
   },
+  ...Object.fromEntries(
+    Object.keys(plannedCourses).map((course) => [
+      course,
+      {
+        lesson: 10,
+        exercise: 5,
+        challenge: 5,
+        quiz: 5,
+      },
+    ]),
+  ),
 };
 
 const NEXT_LINKS: Record<string, string> = {
   python: '/courses/python',
   cpp: '/courses/cpp',
   java: '/courses/java',
+  ...Object.fromEntries(Object.keys(plannedCourses).map((course) => [course, `/courses/${course}`])),
 };
 
 const COURSE_ROUTE_LINKS: Record<string, Array<{ href: string; label: string }>> = {
@@ -68,6 +83,18 @@ const COURSE_ROUTE_LINKS: Record<string, Array<{ href: string; label: string }>>
     { href: '/courses/java/challenges', label: 'Retos' },
     { href: '/courses/java/quiz', label: 'Evaluacion' },
   ],
+  ...Object.fromEntries(
+    Object.keys(plannedCourses).map((course) => [
+      course,
+      [
+        { href: `/courses/${course}/modules`, label: 'Modulos' },
+        { href: `/courses/${course}/lessons`, label: 'Lecciones' },
+        { href: `/courses/${course}/exercises`, label: 'Ejercicios' },
+        { href: `/courses/${course}/challenges`, label: 'Retos' },
+        { href: `/courses/${course}/quiz`, label: 'Evaluacion' },
+      ],
+    ]),
+  ),
 };
 
 const CATEGORY_LABELS: Record<string, string> = {

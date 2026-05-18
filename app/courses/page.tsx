@@ -225,7 +225,7 @@ export default function CoursesPage() {
             <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Cursos CoddyUMG</p>
             <h1 className="mt-3 text-4xl font-extrabold text-gray-900 sm:text-5xl">Rutas de aprendizaje</h1>
             <p className="mt-4 text-xl text-gray-500">
-              Explora las categorias de CoddyUMG. Programacion Basica ya esta activa; las demas quedan listas para crear su estructura y contenido.
+              Explora las categorias de CoddyUMG. Todos los cursos listados tienen modulos, lecciones, ejercicios, retos y evaluacion.
             </p>
           </div>
 
@@ -272,7 +272,7 @@ export default function CoursesPage() {
                         <h3 className="text-2xl font-semibold text-gray-900">{course.title}</h3>
                       </div>
                       <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600">
-                        Proximamente
+                        Estructurado
                       </span>
                     </div>
                     <p className="mt-3 text-gray-600">{course.description}</p>
@@ -288,7 +288,7 @@ export default function CoursesPage() {
                       El admin ya puede preparar contenido de C# desde Gestionar contenido.
                     </p>
                     <Link href={course.href} className="mt-5 inline-flex w-fit rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
-                      Ver estructura
+                      Abrir curso
                     </Link>
                   </article>
                 ))}
@@ -301,7 +301,7 @@ export default function CoursesPage() {
                   <div className="flex items-center gap-4">
                     <CourseIcon name={category.icon} />
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Listo para estructurar</p>
+                      <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Curso estructurado</p>
                       <h2 className="mt-2 text-3xl font-bold text-gray-900">{category.title}</h2>
                     </div>
                   </div>
@@ -314,7 +314,7 @@ export default function CoursesPage() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <h3 className="text-2xl font-semibold text-gray-900">{course.title}</h3>
                         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600">
-                          Proximamente
+                          Estructurado
                         </span>
                       </div>
                       <p className="mt-3 text-gray-600">{course.description}</p>
@@ -330,7 +330,7 @@ export default function CoursesPage() {
                         El admin ya puede preparar contenido para esta categoria desde Gestionar contenido.
                       </p>
                       <Link href={course.href} className="mt-5 inline-flex w-fit rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
-                        Ver estructura
+                        Abrir curso
                       </Link>
                     </article>
                   ))}

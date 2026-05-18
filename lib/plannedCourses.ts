@@ -1,24 +1,21 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import AppFooter from '@/app/components/AppFooter';
-import SiteHeader from '@/app/components/SiteHeader';
+export type PlannedModule = {
+  title: string;
+  goal: string;
+  lessons: string[];
+  project: string;
+};
 
-type PlannedCourse = {
+export type PlannedCourse = {
   category: string;
   description: string;
   evaluations: string[];
   exercises: string[];
-  modules: Array<{
-    title: string;
-    goal: string;
-    lessons: string[];
-    project: string;
-  }>;
+  modules: PlannedModule[];
   challenges: string[];
   title: string;
 };
 
-const plannedCourses: Record<string, PlannedCourse> = {
+export const plannedCourses: Record<string, PlannedCourse> = {
   csharp: {
     category: 'Programacion Basica',
     title: 'C#',
@@ -186,7 +183,7 @@ const plannedCourses: Record<string, PlannedCourse> = {
   },
 };
 
-function getLessonExample(course: PlannedCourse, lesson: string) {
+export function getLessonExample(course: PlannedCourse, lesson: string) {
   if (course.title === 'C#') {
     return `// ${lesson}\nusing System;\n\nvar tema = "${lesson}";\nConsole.WriteLine($"Practica: {tema}");`;
   }
@@ -214,11 +211,11 @@ function getLessonExample(course: PlannedCourse, lesson: string) {
   return `# ${lesson}\n- Identifica el riesgo.\n- Propone un control.\n- Documenta evidencia.\n- Verifica la mitigacion.`;
 }
 
-function getLessonContent(course: PlannedCourse, moduleTitle: string, lesson: string) {
+export function getLessonContent(course: PlannedCourse, moduleTitle: string, lesson: string) {
   return `En esta leccion de ${course.title} se trabaja ${lesson.toLowerCase()} dentro del modulo ${moduleTitle}. El objetivo es que el estudiante entienda el concepto, observe un ejemplo y pueda explicar donde se aplica en un caso academico o profesional.`;
 }
 
-function getExerciseDetail(course: PlannedCourse, exercise: string, index: number) {
+export function getExerciseDetail(course: PlannedCourse, exercise: string, index: number) {
   const starter =
     course.category === 'Bases de datos'
       ? `-- Punto de partida\nselect * from tabla_base where id = ${index + 1};`
@@ -233,11 +230,11 @@ function getExerciseDetail(course: PlannedCourse, exercise: string, index: numbe
   return {
     objective: `Resolver "${exercise}" aplicando lo aprendido y dejando evidencia clara del resultado.`,
     starter,
-    expected: `Entrega valida: solucion documentada, resultado comprobable y una breve explicacion de por que funciona.`,
+    expected: 'Entrega valida: solucion documentada, resultado comprobable y una breve explicacion de por que funciona.',
   };
 }
 
-function getChallengeSteps(challenge: string) {
+export function getChallengeSteps(challenge: string) {
   return [
     `Analiza el caso "${challenge}" y define el objetivo principal.`,
     'Divide la solucion en pasos verificables.',
@@ -246,160 +243,54 @@ function getChallengeSteps(challenge: string) {
   ];
 }
 
-function getEvaluationQuestion(course: PlannedCourse, evaluation: string) {
+export function getEvaluationQuestion(course: PlannedCourse, evaluation: string) {
   return {
     question: `Que debe demostrar el estudiante en "${evaluation}" dentro de ${course.title}?`,
     options: ['Comprension del concepto y aplicacion practica', 'Solo memorizacion de definiciones', 'Uso de herramientas sin explicar resultados'],
-    answer: 'Comprension del concepto y aplicacion practica',
+    answer: 0,
   };
 }
 
-export function generateStaticParams() {
-  return Object.keys(plannedCourses).map((course) => ({ course }));
+export function getCourseExercises(courseSlug: string) {
+  const course = plannedCourses[courseSlug];
+  if (!course) return [];
+
+  return course.exercises.map((exercise, index) => {
+    const detail = getExerciseDetail(course, exercise, index);
+
+    return {
+      title: `Ejercicio ${index + 1}: ${exercise}`,
+      description: detail.objective,
+      goal: `Practicar ${exercise.toLowerCase()}.`,
+      code: detail.starter,
+      expected: detail.expected,
+    };
+  });
 }
 
-export default async function PlannedCoursePage({
-  params,
-}: {
-  params: Promise<{ course: string }>;
-}) {
-  const { course } = await params;
-  const data = plannedCourses[course];
+export function getCourseChallenges(courseSlug: string) {
+  const course = plannedCourses[courseSlug];
+  if (!course) return [];
 
-  if (!data) {
-    notFound();
-  }
+  return course.challenges.map((challenge, index) => ({
+    title: `Reto ${index + 1}: ${challenge}`,
+    description: `Caso aplicado para demostrar dominio de ${challenge.toLowerCase()}.`,
+    steps: getChallengeSteps(challenge),
+    sample: `Entrega: ${challenge}\nEvidencia: procedimiento, resultado y recomendacion.`,
+  }));
+}
 
-  return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      <SiteHeader />
-      <main className="flex-1">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <Link href="/courses" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-            Volver a cursos
-          </Link>
+export function getCourseQuestions(courseSlug: string) {
+  const course = plannedCourses[courseSlug];
+  if (!course) return [];
 
-          <section className="mt-6 rounded-lg bg-white p-8 shadow">
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">{data.category}</p>
-            <h1 className="mt-3 text-4xl font-extrabold text-gray-900">{data.title}</h1>
-            <p className="mt-4 max-w-3xl text-lg text-gray-600">{data.description}</p>
-            <p className="mt-5 rounded-md bg-blue-50 px-4 py-3 text-sm font-medium text-blue-800">
-              Curso estructurado con modulos, lecciones, ejercicios, retos y evaluacion. Puedes avanzar y registrar progreso desde sus actividades.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href={`/courses/${course}/modules`} className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
-                Modulos
-              </Link>
-              <Link href={`/courses/${course}/lessons`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Lecciones
-              </Link>
-              <Link href={`/courses/${course}/exercises`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Ejercicios
-              </Link>
-              <Link href={`/courses/${course}/challenges`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Retos
-              </Link>
-              <Link href={`/courses/${course}/quiz`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Evaluacion
-              </Link>
-            </div>
-          </section>
+  return course.evaluations.map((evaluation) => {
+    const detail = getEvaluationQuestion(course, evaluation);
 
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-gray-900">Modulos</h2>
-            <div className="mt-5 grid gap-6 lg:grid-cols-2">
-              {data.modules.map((module, index) => (
-                <article key={module.title} className="rounded-lg bg-white p-6 shadow">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Modulo {index + 1}</p>
-                  <h3 className="mt-2 text-xl font-bold text-gray-900">{module.title}</h3>
-                  <p className="mt-2 text-sm text-gray-600">{module.goal}</p>
-                  <div className="mt-4">
-                    <h4 className="text-sm font-semibold text-gray-900">Lecciones</h4>
-                    <div className="mt-3 space-y-4">
-                      {module.lessons.map((lesson, lessonIndex) => (
-                        <article key={lesson} className="rounded-md border border-gray-200 p-4">
-                          <p className="text-sm font-semibold text-gray-900">
-                            Leccion {lessonIndex + 1}: {lesson}
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-gray-600">{getLessonContent(data, module.title, lesson)}</p>
-                          <pre className="mt-3 overflow-x-auto rounded-md bg-gray-950 p-3 text-xs text-green-200">
-                            <code>{getLessonExample(data, lesson)}</code>
-                          </pre>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="mt-4 rounded-md bg-gray-50 p-3 text-sm text-gray-700">
-                    <span className="font-semibold text-gray-900">Proyecto del modulo: </span>
-                    {module.project}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            <section className="rounded-lg bg-white p-6 shadow">
-              <h2 className="text-xl font-bold text-gray-900">Ejercicios</h2>
-              <div className="mt-4 space-y-4">
-                {data.exercises.map((exercise, index) => {
-                  const detail = getExerciseDetail(data, exercise, index);
-
-                  return (
-                    <article key={exercise} className="rounded-md border border-gray-200 p-4">
-                      <p className="text-sm font-semibold text-gray-900">Ejercicio {index + 1}: {exercise}</p>
-                      <p className="mt-2 text-sm text-gray-600">{detail.objective}</p>
-                      <pre className="mt-3 overflow-x-auto rounded-md bg-gray-950 p-3 text-xs text-green-200">
-                        <code>{detail.starter}</code>
-                      </pre>
-                      <p className="mt-3 text-xs font-medium text-gray-600">{detail.expected}</p>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="rounded-lg bg-white p-6 shadow">
-              <h2 className="text-xl font-bold text-gray-900">Retos</h2>
-              <div className="mt-4 space-y-4">
-                {data.challenges.map((challenge, index) => (
-                  <article key={challenge} className="rounded-md border border-gray-200 p-4">
-                    <p className="text-sm font-semibold text-gray-900">Reto {index + 1}: {challenge}</p>
-                    <ul className="mt-3 space-y-2 text-sm text-gray-600">
-                      {getChallengeSteps(challenge).map((step) => (
-                        <li key={step}>- {step}</li>
-                      ))}
-                    </ul>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded-lg bg-white p-6 shadow">
-              <h2 className="text-xl font-bold text-gray-900">Evaluaciones</h2>
-              <div className="mt-4 space-y-4">
-                {data.evaluations.map((evaluation, index) => {
-                  const detail = getEvaluationQuestion(data, evaluation);
-
-                  return (
-                    <article key={evaluation} className="rounded-md border border-gray-200 p-4">
-                      <p className="text-sm font-semibold text-gray-900">Evaluacion {index + 1}: {evaluation}</p>
-                      <p className="mt-2 text-sm text-gray-600">{detail.question}</p>
-                      <ul className="mt-3 space-y-2 text-sm text-gray-600">
-                        {detail.options.map((option) => (
-                          <li key={option}>- {option}</li>
-                        ))}
-                      </ul>
-                      <p className="mt-3 rounded-md bg-green-50 p-2 text-xs font-semibold text-green-800">Respuesta esperada: {detail.answer}</p>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          </div>
-        </div>
-      </main>
-      <AppFooter />
-    </div>
-  );
+    return {
+      prompt: detail.question,
+      options: detail.options,
+      answer: detail.answer,
+    };
+  });
 }

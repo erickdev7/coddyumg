@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import AppFooter from '@/app/components/AppFooter';
 import ProgressButton from '@/app/components/ProgressButton';
 import SiteHeader from '@/app/components/SiteHeader';
+import { getLessonContent, getLessonExample, plannedCourses } from '@/lib/plannedCourses';
 
 const courseLabels: Record<string, string> = {
   python: 'Python',
@@ -72,12 +73,14 @@ function getLessonDetail(course: string, courseName: string, title: string, less
 }
 
 export function generateStaticParams() {
-  return Object.keys(courseLabels).flatMap((course) =>
-    Array.from({ length: 25 }, (_, index) => ({
-      course,
-      lesson: String(index + 1),
-    })),
+  const activeParams = Object.keys(courseLabels).flatMap((course) =>
+    Array.from({ length: 25 }, (_, index) => ({ course, lesson: String(index + 1) })),
   );
+  const plannedParams = Object.entries(plannedCourses).flatMap(([course, data]) =>
+    Array.from({ length: data.modules.flatMap((module) => module.lessons).length }, (_, index) => ({ course, lesson: String(index + 1) })),
+  );
+
+  return [...activeParams, ...plannedParams];
 }
 
 export default async function LessonDetailPage({
@@ -89,6 +92,96 @@ export default async function LessonDetailPage({
   const lessonNumber = Number(lesson);
   const courseName = courseLabels[course];
   const title = lessonThemes[course]?.[lessonNumber - 1];
+  const plannedCourse = plannedCourses[course];
+
+  if (plannedCourse) {
+    const lessons = plannedCourse.modules.flatMap((module) => module.lessons.map((lessonTitle) => ({ lessonTitle, module })));
+    const plannedLesson = lessons[lessonNumber - 1];
+
+    if (!plannedLesson || lessonNumber < 1) {
+      notFound();
+    }
+
+    const previous = lessonNumber > 1 ? `/courses/${course}/lessons/${lessonNumber - 1}` : null;
+    const next = lessonNumber < lessons.length ? `/courses/${course}/lessons/${lessonNumber + 1}` : `/courses/${course}/quiz`;
+
+    return (
+      <div className="flex min-h-screen flex-col bg-gray-50">
+        <SiteHeader />
+        <main className="flex-1">
+          <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+            <Link href={`/courses/${course}/lessons#lesson-${lessonNumber}`} className="text-sm font-medium text-blue-600 hover:text-blue-700">
+              Volver al listado de lecciones
+            </Link>
+
+            <article className="mt-6 rounded-lg bg-white p-8 shadow">
+              <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+                {plannedCourse.title} | {plannedLesson.module.title} | Leccion {lessonNumber}
+              </p>
+              <h1 className="mt-3 text-4xl font-extrabold text-gray-900">{plannedLesson.lessonTitle}</h1>
+              <p className="mt-5 text-lg leading-8 text-gray-600">
+                {getLessonContent(plannedCourse, plannedLesson.module.title, plannedLesson.lessonTitle)}
+              </p>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+                <section>
+                  <h2 className="text-2xl font-bold text-gray-900">Explicacion guiada</h2>
+                  <p className="mt-4 text-gray-600">
+                    Relaciona este tema con el proyecto del modulo: {plannedLesson.module.project} Antes de continuar, adapta el ejemplo a un caso propio y documenta el resultado.
+                  </p>
+                </section>
+
+                <aside className="rounded-lg bg-blue-50 p-5">
+                  <h2 className="font-semibold text-blue-900">Checklist de estudio</h2>
+                  <ul className="mt-3 space-y-2 text-sm text-blue-800">
+                    <li>- Identifica el concepto principal.</li>
+                    <li>- Revisa el ejemplo y modifica un dato.</li>
+                    <li>- Explica el resultado con tus palabras.</li>
+                    <li>- Marca la leccion como completada.</li>
+                  </ul>
+                </aside>
+              </div>
+
+              <div className="mt-8 rounded-md bg-gray-950 p-5 font-mono text-sm text-green-200">
+                <pre>{getLessonExample(plannedCourse, plannedLesson.lessonTitle)}</pre>
+              </div>
+
+              <div className="mt-6 rounded-md bg-gray-50 p-5">
+                <h2 className="font-semibold text-gray-900">Practica sugerida</h2>
+                <p className="mt-2 text-sm text-gray-700">
+                  Crea una version propia del ejemplo para {plannedCourse.title}. Incluye objetivo, pasos y salida esperada.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link href={`/courses/${course}/exercises#exercise-${Math.ceil(lessonNumber / 2)}`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
+                    Ir al ejercicio relacionado
+                  </Link>
+                  <Link href={`/courses/${course}/challenges#challenge-${Math.ceil(lessonNumber / 2)}`} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
+                    Ir al reto relacionado
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <ProgressButton course={course} activity={`${lessonNumber}. ${plannedLesson.lessonTitle}`} />
+              </div>
+            </article>
+
+            <div className="mt-6 flex flex-wrap justify-between gap-3">
+              {previous ? (
+                <Link href={previous} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white">
+                  Leccion anterior
+                </Link>
+              ) : <span />}
+              <Link href={next} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                {lessonNumber < lessons.length ? 'Siguiente leccion' : 'Ir a evaluacion'}
+              </Link>
+            </div>
+          </div>
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
 
   if (!courseName || !title || lessonNumber < 1 || lessonNumber > 25) {
     notFound();
