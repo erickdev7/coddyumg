@@ -187,8 +187,104 @@ function includesAny(value: string, terms: string[]) {
   return terms.some((term) => value.includes(term));
 }
 
+function safeIdentifier(value: string) {
+  const normalized = value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  return normalized || 'tema';
+}
+
+function getGeneratedLessonExample(course: PlannedCourse, lesson: string, normalized: string) {
+  if (!includesAny(normalized, ['aplicacion guiada', 'buenas practicas', 'proyecto aplicado'])) {
+    return null;
+  }
+
+  if (course.title === 'C#') {
+    if (normalized.includes('aplicacion guiada')) {
+      return `// Aplicacion guiada en C#\nusing System;\nusing System.Collections.Generic;\n\nvar actividades = new List<string> { "analizar", "codificar", "probar" };\n\nforeach (var actividad in actividades)\n{\n    Console.WriteLine($"Paso: {actividad} para ${lesson}");\n}`;
+    }
+
+    if (normalized.includes('buenas practicas')) {
+      return `// Buenas practicas en C#\nstatic bool EsNotaValida(int nota) => nota >= 0 && nota <= 100;\n\nint nota = 92;\nif (!EsNotaValida(nota))\n{\n    throw new ArgumentOutOfRangeException(nameof(nota));\n}\n\nConsole.WriteLine("Dato validado antes de procesar");`;
+    }
+
+    return `// Proyecto aplicado en C#\nvar tareas = new[] { "modelar entidad", "validar datos", "mostrar reporte" };\nvar completadas = tareas.Select((tarea, indice) => $"{indice + 1}. {tarea}");\n\nConsole.WriteLine("Entrega del proyecto:");\nConsole.WriteLine(string.Join("\\n", completadas));`;
+  }
+
+  if (course.category === 'Bases de datos') {
+    if (normalized.includes('aplicacion guiada')) {
+      return `-- Aplicacion guiada de base de datos\nwith resumen as (\n  select course, count(*) as actividades, avg(score) as promedio\n  from progress\n  group by course\n)\nselect course, actividades, round(promedio, 2) as promedio\nfrom resumen\norder by promedio desc;`;
+    }
+
+    if (normalized.includes('buenas practicas')) {
+      return `-- Buenas practicas de diseno\nalter table course_content\n  add constraint course_content_title_not_empty\n  check (length(trim(title)) > 0);\n\ncreate index if not exists course_content_published_idx\n  on course_content (published, course, content_type);`;
+    }
+
+    return `-- Proyecto aplicado de base de datos\ncreate table project_checkpoints (\n  id uuid primary key default gen_random_uuid(),\n  course text not null,\n  checkpoint text not null,\n  completed boolean not null default false,\n  created_at timestamptz not null default now()\n);`;
+  }
+
+  if (course.category === 'Redes') {
+    if (normalized.includes('aplicacion guiada')) {
+      return `# Aplicacion guiada de redes\nObjetivo: validar conectividad de un servicio academico\n1. ping gateway.local\n2. nslookup plataforma.local\n3. curl -I https://plataforma.local\nConclusion: separar problema de red, DNS o servicio web.`;
+    }
+
+    if (normalized.includes('buenas practicas')) {
+      return `# Buenas practicas de redes\n- Documentar direccion IP, mascara, gateway y DNS.\n- Separar alumnos, docentes y servidores por segmentos.\n- Usar nombres de host claros.\n- Guardar evidencia de cada cambio.`;
+    }
+
+    return `# Proyecto aplicado de redes\nTopologia:\nAlumno -> Switch VLAN 10 -> Router -> Servidor Web\nPrueba final:\n- Resolver DNS\n- Verificar HTTPS\n- Medir latencia\n- Documentar ruta y punto de falla si existe`;
+  }
+
+  if (course.category === 'Desarrollo Web' && course.title === 'Frontend') {
+    if (normalized.includes('aplicacion guiada')) {
+      return `// Aplicacion guiada de frontend\nconst cursos = [\n  { title: "Frontend", progress: 40 },\n  { title: "Backend", progress: 20 },\n];\n\nconst visibles = cursos.filter((curso) => curso.progress < 100);\nconsole.table(visibles);`;
+    }
+
+    if (normalized.includes('buenas practicas')) {
+      return `/* Buenas practicas de UI */\n.button {\n  min-height: 40px;\n  padding: 0.5rem 1rem;\n}\n\n.button:focus-visible {\n  outline: 2px solid #2563eb;\n  outline-offset: 2px;\n}`;
+    }
+
+    return `<!-- Proyecto aplicado de frontend -->\n<main>\n  <h1>Panel de cursos</h1>\n  <section aria-label="Cursos activos">\n    <article><h2>Frontend</h2><p>Lecciones, ejercicios y retos.</p></article>\n  </section>\n</main>`;
+  }
+
+  if (course.category === 'Desarrollo Web') {
+    if (normalized.includes('aplicacion guiada')) {
+      return `// Aplicacion guiada de API\nexport async function PATCH(request) {\n  const { id, status } = await request.json();\n  if (!id || !status) return Response.json({ error: "Datos invalidos" }, { status: 400 });\n  return Response.json({ id, status, updated: true });\n}`;
+    }
+
+    if (normalized.includes('buenas practicas')) {
+      return `// Buenas practicas de backend\nfunction jsonError(message, status = 400) {\n  return Response.json({ error: message }, { status });\n}\n\nfunction requireTeacher(profile) {\n  if (profile?.role !== "teacher") return jsonError("No autorizado", 403);\n  return null;\n}`;
+    }
+
+    return `// Proyecto aplicado de backend\nconst routes = [\n  "GET /api/courses",\n  "POST /api/progress",\n  "PATCH /api/enrollments",\n];\n\nconsole.log("API lista:", routes.join(", "));`;
+  }
+
+  if (course.category === 'Ciberseguridad') {
+    if (normalized.includes('aplicacion guiada')) {
+      return `# Aplicacion guiada de seguridad\nActivo: plataforma educativa\nRiesgo: acceso no autorizado\nControl: MFA + roles por ruta\nEvidencia: captura de configuracion y prueba de acceso denegado\nMitigacion: revisar permisos cada semestre`;
+    }
+
+    if (normalized.includes('buenas practicas')) {
+      return `# Buenas practicas de seguridad\n- Definir alcance antes de probar.\n- Usar datos de laboratorio.\n- Registrar evidencia sin exponer secretos.\n- Priorizar mitigaciones por impacto.\n- Validar que el control funcione despues del cambio.`;
+    }
+
+    return `# Proyecto aplicado de seguridad\nEntregables:\n1. Alcance autorizado\n2. Matriz de riesgos\n3. Evidencia tecnica\n4. Recomendaciones\n5. Plan de verificacion`;
+  }
+
+  return `# ${lesson}\nCaso guiado para ${course.title}\n1. Define el objetivo.\n2. Ejecuta un ejemplo propio.\n3. Registra evidencia.\n4. Explica el resultado.`;
+}
+
 export function getLessonExample(course: PlannedCourse, lesson: string) {
   const normalized = lesson.toLowerCase();
+  const generatedLessonExample = getGeneratedLessonExample(course, lesson, normalized);
+
+  if (generatedLessonExample) {
+    return generatedLessonExample;
+  }
 
   if (course.title === 'C#') {
     if (includesAny(normalized, ['variables', 'tipos', 'consola'])) {
@@ -267,7 +363,8 @@ export function getLessonExample(course: PlannedCourse, lesson: string) {
       return `-- Seguridad y operacion\ncreate role lector_reportes;\ngrant select on progress to lector_reportes;\n\ncreate table audit_log (\n  id uuid primary key default gen_random_uuid(),\n  accion text not null,\n  creado_en timestamptz default now()\n);`;
     }
 
-    return `-- ${lesson}\nselect curso, count(*) as total\nfrom progress\nwhere completed = true\ngroup by curso\norder by total desc;`;
+    const tableName = `practica_${safeIdentifier(lesson)}`;
+    return `-- ${lesson}\ncreate table ${tableName} (\n  id uuid primary key default gen_random_uuid(),\n  descripcion text not null,\n  completado boolean not null default false\n);\n\nselect descripcion, completado\nfrom ${tableName}\norder by descripcion;`;
   }
 
   if (course.category === 'Redes') {
@@ -295,7 +392,7 @@ export function getLessonExample(course: PlannedCourse, lesson: string) {
       return `# Checklist de diagnostico\nping 8.8.8.8\ntracert coddyumg.edu.gt\nnslookup coddyumg.edu.gt\n\n# Si ping falla: revisar gateway.\n# Si nslookup falla: revisar DNS.\n# Si tracert se corta: revisar ruta o firewall.`;
     }
 
-    return `# ${lesson}\nObjetivo: documentar configuracion, prueba ejecutada y resultado observado.\nEvidencia: comando, salida y conclusion tecnica.`;
+    return `# ${lesson}\nObjetivo: validar el tema "${lesson}" en un escenario controlado.\nComando o evidencia: documenta direccion, servicio, puerto o ruta revisada.\nResultado esperado: identificar si el problema esta en cliente, red, nombre DNS o servicio.`;
   }
 
   if (course.category === 'Desarrollo Web' && course.title === 'Frontend') {
@@ -319,7 +416,8 @@ export function getLessonExample(course: PlannedCourse, lesson: string) {
       return `// Consumo de API\nasync function cargarCursos() {\n  const response = await fetch("/api/content?published=true");\n  if (!response.ok) throw new Error("No se pudo cargar");\n  return response.json();\n}`;
     }
 
-    return `<!-- ${lesson} -->\n<section class="curso">\n  <h2>CoddyUMG</h2>\n  <p>Construye una interfaz clara, accesible y responsive.</p>\n</section>`;
+    const componentName = safeIdentifier(lesson).replace(/(^|_)([a-z])/g, (_match, _separator, letter: string) => letter.toUpperCase());
+    return `<!-- ${lesson} -->\n<section class="${safeIdentifier(lesson)}" aria-labelledby="${safeIdentifier(lesson)}-title">\n  <h2 id="${safeIdentifier(lesson)}-title">${componentName}</h2>\n  <p>Interfaz preparada para practicar ${lesson.toLowerCase()}.</p>\n  <button type="button">Guardar avance</button>\n</section>`;
   }
 
   if (course.category === 'Desarrollo Web') {
@@ -388,7 +486,7 @@ export function getLessonExample(course: PlannedCourse, lesson: string) {
     }
   }
 
-  return `# ${lesson}\n- Define el objetivo tecnico.\n- Aplica el procedimiento del modulo.\n- Documenta evidencia.\n- Verifica el resultado y propone mejora.`;
+  return `# ${lesson}\nObjetivo especifico: aplicar ${lesson.toLowerCase()} en ${course.title}.\nActividad:\n- Define un caso propio.\n- Ejecuta el procedimiento del modulo.\n- Documenta evidencia unica del tema.\n- Cierra con una mejora concreta.`;
 }
 
 export function getLessonContent(course: PlannedCourse, moduleTitle: string, lesson: string) {
